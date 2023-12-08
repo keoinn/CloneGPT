@@ -20,6 +20,21 @@ const scrollToNewChat = (targetY) => {
     window.scrollTo(0, targetY);
 }
 
+const chatGPT_mode = 1; // 1: Allow send history
+const maxiuma_messages_list = 6;
+let messageHistory = [];
+const messagesListUpdate = (role, msg) => {
+    const currentMsg = {'role': role, 'content':msg}
+    if(messageHistory.length >= maxiuma_messages_list){
+        messageHistory.shift();
+    }
+    messageHistory.push(currentMsg);
+
+    console.log(messageHistory);
+    // 儲存到 localStorage
+    localStorage.setItem("chat-history", messageHistory);
+}
+
 /**
  * 載入歷史對話紀錄
  */
@@ -56,7 +71,6 @@ const createElement = (html, className) => {
     return chatDiv;
 }
 
-
 const showTypingAnimation = () => {
     const html = `
                 <div class="chat-content">
@@ -85,6 +99,22 @@ const getChatResponse = async (incomingChatDiv) => {
     //const API_URL = "https://api.openai.com/v1/chat/completions";
     const API_URL = "https://api.openai.com/v1/chat/completions";
     const pElement = document.createElement("p");
+    
+    // 更新使用者傳出的問題
+    messagesListUpdate('user', userText);
+    let send_messages = [
+        {
+            'role': 'user',
+            "content": userText
+        }
+    ];
+
+    // 判斷聊天模式為單則式
+    if(chatGPT_mode == 1){
+        send_messages = messageHistory;
+    }
+
+    //
     const requestOptions = {
         method: "POST",
         headers: {
@@ -93,12 +123,7 @@ const getChatResponse = async (incomingChatDiv) => {
         },
         body: JSON.stringify({
             model: 'gpt-3.5-turbo',
-            messages: [
-                {
-                    'role': 'user',
-                    "content": userText
-                }
-            ],
+            messages: send_messages,
             max_tokens: 2048,
             temperature: 0.2,
             // top_n: 1,
@@ -111,7 +136,7 @@ const getChatResponse = async (incomingChatDiv) => {
         const response = await (await fetch(API_URL, requestOptions)).json();
         console.log(response);
         pElement.textContent = response.choices[0].message.content;
-
+        messagesListUpdate('system', response.choices[0].message.content);
     } catch (error) {
         console.log(error);
         pElement.classList.add("error");
@@ -174,6 +199,7 @@ sendButton.addEventListener("click", handleOutgoingChat);
 deleteButton.addEventListener("click", ()=>{
     if(confirm("您確定要刪除歷史對話嗎?")){
         localStorage.removeItem("all-chats");
+        localStorage.removeItem("chat-history");
         loadDataFromLocalstorage();
     }
 });
