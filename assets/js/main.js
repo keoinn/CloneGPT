@@ -1,12 +1,11 @@
-// const API_KEY = 'YOUR API KEY';
+const API_KEY = 'YOUR API KEY';
 
 const chatInput = document.querySelector('#chat-input');
 const sendButton = document.querySelector('#sent-btn');
 const chatContainer = document.querySelector('.chat-container');
 const themeButton = document.querySelector('#theme-btn');
 const deleteButton = document.querySelector('#delete-btn');
-
-
+const converter = new showdown.Converter();
 let userText = null;
 const initialHeight = chatInput.scrollHeight;
 
@@ -20,6 +19,7 @@ const scrollToNewChat = (targetY) => {
     window.scrollTo(0, targetY);
 }
 
+// ChatGPT 對答詢問歷史
 const chatGPT_mode = 1; // 1: Allow send history
 const maxiuma_messages_list = 6;
 let messageHistory = [];
@@ -62,7 +62,7 @@ loadDataFromLocalstorage();
 
 
 
-
+// UI: 產生對話視窗
 const createElement = (html, className) => {
     // 建立新的 div --> 包括對話文字、class、html 內容
     const chatDiv = document.createElement("div");
@@ -71,6 +71,7 @@ const createElement = (html, className) => {
     return chatDiv;
 }
 
+// UI: ChatGPT 回覆動畫 + 發送請求 + 產生訊息視窗
 const showTypingAnimation = () => {
     const html = `
                 <div class="chat-content">
@@ -95,10 +96,10 @@ const showTypingAnimation = () => {
     getChatResponse(incomingChatDiv);
 }
 
+// ChatGPT API 
 const getChatResponse = async (incomingChatDiv) => {
-    //const API_URL = "https://api.openai.com/v1/chat/completions";
     const API_URL = "https://api.openai.com/v1/chat/completions";
-    const pElement = document.createElement("p");
+    const pElement = document.createElement("div");
     
     // 更新使用者傳出的問題
     messagesListUpdate('user', userText);
@@ -134,8 +135,9 @@ const getChatResponse = async (incomingChatDiv) => {
     // 從 OpenAI 的 ChatGPT 取得回應
     try {
         const response = await (await fetch(API_URL, requestOptions)).json();
-        console.log(response);
-        pElement.textContent = response.choices[0].message.content;
+        //console.log(response);
+        console.log(converter.makeHtml(response.choices[0].message.content));
+        pElement.innerHTML = converter.makeHtml(response.choices[0].message.content);
         messagesListUpdate('system', response.choices[0].message.content);
     } catch (error) {
         console.log(error);
@@ -149,6 +151,8 @@ const getChatResponse = async (incomingChatDiv) => {
     incomingChatDiv.querySelector(".chat-details").appendChild(pElement);
     // 自動捲動畫面至最新訊息列
     scrollToNewChat(chatContainer.scrollHeight);
+    
+    hljs.highlightAll();
     // 儲存當前對話階段在瀏覽器中
     localStorage.setItem("all-chats", chatContainer.innerHTML);
 }
@@ -242,3 +246,6 @@ const copyResponse = (copyBtn) => {
     copyBtn.textContent = "已複製";
     setTimeout(() => copyBtn.textContent = "content_copy", 3000);
 }
+
+// 初始化程式碼區塊 + 關鍵字上色
+hljs.highlightAll();

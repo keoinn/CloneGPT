@@ -29,6 +29,16 @@ body {
   background: var(--outgoing-chat-bg);
   height: auto;
 }
+.hljs {
+	display: block !important;
+	overflow-x: auto !important;
+	padding: .5em !important;
+    border-radius: 10px;
+	/* color: #abb2bf !important; */
+	/* background: #282c34 !important; */
+    margin: 10pt 100px 10pt 50px !important;
+    font-size: 10pt !important;
+}
 .chat-container {
   /* 可以再調整 */
   max-width: 200vh;
@@ -87,7 +97,7 @@ body {
   align-items: flex-start;
   justify-content: space-between;
 }
-.chat .chat-content span {
+.chat .chat-content span.material-symbols-rounded {
   font-size: 1.3rem;
   color: var(--icon-color);
   visibility: hidden;
@@ -111,6 +121,27 @@ body {
   font-size: 1.05rem;
   padding: 0 50px 0 25px;
 }
+.chat .chat-details ul {
+    font-size: 1.05rem;
+    padding: 0 50px 0 50px;
+}
+
+.chat .chat-details div li code {
+    color: #e74c3c;
+    border: 1px solid #e1e4e5;
+    background: #ffffff;
+    box-sizing: border-box;
+    font-size: 75%;
+}
+
+.chat .chat-details div p code {
+    color: #e74c3c;
+    border: 1px solid #e1e4e5;
+    background: #ffffff;
+    box-sizing: border-box;
+    font-size: 75%;
+}
+
 .chat .chat-details p.error {
     color: #e55866;
 }
